@@ -164,8 +164,6 @@ svg {
         <div id="slidersPanel">
             
 
-            <!-- Sliders and Labels -->
-            <!-- ... -->
             <h3 style="text-align: center; margin-bottom: 20px;">Adjust Parameters</h3>
 
             <div class="slider-container">
@@ -206,8 +204,7 @@ svg {
     <svg id="rollerSvg"></svg>
     
     <script>
-        // Existing JavaScript code
-        // ...
+        
         const svg = document.getElementById('rollerSvg');
         const radiusInput = document.getElementById('radiusInput');
         const radiusValue = document.getElementById('radiusValue');
@@ -276,7 +273,7 @@ svg {
             roller.setAttribute('r', d);
             roller.setAttribute('fill', 'orange');
             roller.setAttribute('stroke', 'red');
-            roller.setAttribute('stroke-width', '2');
+            roller.setAttribute('stroke-width', '0');
             svg.appendChild(roller);
         }
 
@@ -288,7 +285,7 @@ svg {
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute('fill', '#0B89F0');
             path.setAttribute('stroke', 'blue');
-            path.setAttribute('stroke-width', '1');
+            path.setAttribute('stroke-width', '0');
             path.setAttribute('d', `M${drawRotor(0)} ${Array.from({ length: Math.ceil(2 * Math.PI / 0.01) }, (_, i) => drawRotor(i * 0.01)).join(' ')}`);
             svg.appendChild(path);
 
@@ -359,22 +356,21 @@ svg {
         resizeSvg();
         printEquations(); // Initial display of equations
 
+        // Function to download the entire SVG content
         function downloadRotorSvg(svgEl, name) {
+            // Clone the SVG element
             let clonedSvg = svgEl.cloneNode(true);
 
-            // Remove elements that are not part of the rotor
-            // Adjust this logic based on your SVG structure
+            // Remove the dashed circle from the cloned SVG
             Array.from(clonedSvg.children).forEach(child => {
-                if (child.tagName !== 'path') {
+                if (child.tagName === 'circle' && child.getAttribute('stroke-dasharray')) {
                     clonedSvg.removeChild(child);
                 }
             });
 
-            // Prepare the SVG data for download
-            clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-            const svgData = clonedSvg.outerHTML;
-            const preface = '<?xml version="1.0" standalone="no"?>\r\n';
-            const svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+            // Serialize and download the modified SVG
+            const svgData = new XMLSerializer().serializeToString(clonedSvg);
+            const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
             const svgUrl = URL.createObjectURL(svgBlob);
             const downloadLink = document.createElement("a");
             downloadLink.href = svgUrl;
@@ -384,10 +380,29 @@ svg {
             document.body.removeChild(downloadLink);
         }
 
-        const downloadButton = document.getElementById('downloadButton');
-        downloadButton.addEventListener('click', () => {
-            downloadRotorSvg(document.getElementById('rollerSvg'), 'rotor_part.svg');
+        // Event listener for the download button
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadButton = document.getElementById('downloadButton');
+            downloadButton.addEventListener('click', () => {
+                downloadRotorSvg(document.getElementById('rollerSvg'), 'complete_design.svg');
+            });
         });
+
+        // Event listener for the download button
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadButton = document.getElementById('downloadButton');
+            downloadButton.addEventListener('click', () => {
+                downloadRotorSvg(document.getElementById('rollerSvg'), 'complete_design.svg');
+            });
+        });
+
+        // Create groups (layers) for different elements
+        const rotorGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        rotorGroup.setAttribute('id', 'rotorGroup');
+        const rollerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        rollerGroup.setAttribute('id', 'rollerGroup');
+        svg.appendChild(rotorGroup);
+        svg.appendChild(rollerGroup);
 
 
 
@@ -396,8 +411,6 @@ svg {
         });
 
 
-        // Rest of the existing JavaScript code
-        // ...
     </script>
 </body>
 </html>
